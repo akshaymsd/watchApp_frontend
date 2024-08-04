@@ -11,21 +11,20 @@ import '../view_model/cart_view_model.dart';
 
 class CartService {
   // Add product to cart
-// Updated method to add product to cart with additional null safety checks
   Future<void> addProductToCart({
-    required String userid,
+    required String userId,
     required productModel product,
   }) async {
     final Uri url = Uri.parse('$baseurl/api/cart/addItem');
 
     final Map<String, dynamic> cartData = {
-      'userId': userid, // Ensure 'userId' is not empty
+      'userId': userId, // Ensure 'userId' is not empty
       'productId': product.sId,
       'quantity': 1,
     };
 
     try {
-      if (userid.isEmpty) {
+      if (userId.isEmpty) {
         throw Exception('User ID is empty');
       }
 
@@ -51,36 +50,19 @@ class CartService {
     }
   }
 
-// Updated method to handle UI updates and error handling
+  // Add product to cart with UI updates
   Future<void> addProductToCartWithUI({
-    required String userid,
+    required String userId,
     required productModel product,
     required BuildContext context,
-    required CartService
-        cartService, // Ensure CartService is provided correctly
   }) async {
     try {
-      // Ensure cartService is not null
-      if (cartService == null) {
-        throw Exception('CartService is null');
-      }
-
-      // Ensure context is not null and provider is available
       final cartViewModel = Provider.of<CartViewModel>(context, listen: false);
-      if (cartViewModel == null) {
-        throw Exception('CartViewModel is null');
-      }
 
       cartViewModel.loading = true;
       cartViewModel.notifyListeners();
 
-      // Check if product.sId is null
-      if (product.sId == null) {
-        throw Exception('Product ID is null');
-      }
-
-      // Add product to cart
-      await cartService.addProductToCart(userid: userid, product: product);
+      await addProductToCart(userId: userId, product: product);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -95,14 +77,9 @@ class CartService {
         ),
       );
     } finally {
-      // Hide loading indicator
       final cartViewModel = Provider.of<CartViewModel>(context, listen: false);
-      if (cartViewModel != null) {
-        cartViewModel.loading = false;
-        cartViewModel.notifyListeners();
-      } else {
-        print('CartViewModel is null');
-      }
+      cartViewModel.loading = false;
+      cartViewModel.notifyListeners();
     }
   }
 
@@ -137,13 +114,13 @@ class CartService {
 
   // Remove product from cart
   Future<void> removeProductFromCart({
-    required String userid,
+    required String userId,
     required String productId,
   }) async {
     final Uri url = Uri.parse('$baseurl/api/cart/removeItem');
     final Map<String, dynamic> cartData = {
-      'userid': userid,
-      'productid': productId,
+      'userId': userId,
+      'productId': productId,
     };
 
     try {
@@ -159,7 +136,33 @@ class CartService {
         throw Exception('Failed to remove product from cart: ${response.body}');
       }
     } catch (e) {
+      print('An error occurred: $e');
       throw Exception('An error occurred: $e');
+    }
+  }
+
+  Future<bool> deleteItem(String itemId) async {
+    final response = await http.delete(
+      Uri.parse('$baseurl/api/cart/removeItem/$itemId'),
+    );
+
+    return response.statusCode == 200;
+  }
+
+  static Future<void> updateCartItemQuantity(
+      String itemId, int newQuantity) async {
+    final url = Uri.parse('$baseurl/api/cart/updateItem/$itemId');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'quantity': newQuantity}),
+    );
+
+    print('Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update cart item quantity');
     }
   }
 }

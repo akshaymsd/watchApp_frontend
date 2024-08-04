@@ -3,7 +3,7 @@ class UserModel {
   String? password;
   String? name;
   String? email;
-  String? phone;
+  String? phone; // Changed to String
   String? sId;
   int? iV;
 
@@ -24,8 +24,8 @@ class UserModel {
       password: json['password'],
       name: json['name'],
       email: json['email'],
-      phone: json['phone'],
-      sId: json['_id'], // Ensure this matches your API response
+      phone: json['phone'], // Ensure this matches your API response
+      sId: json['_id'],
       iV: json['__v'],
     );
   }
@@ -37,7 +37,7 @@ class UserModel {
     data['password'] = password; // Consider omitting this for security reasons
     data['name'] = name;
     data['email'] = email;
-    data['phone'] = phone;
+    data['phone'] = phone; // Store as String
     return data;
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:watchapp/screen/modules/admin/admin_screen.dart';
+import 'package:watchapp/screen/auth/auth_check.dart';
 import 'package:watchapp/services/cart_services.dart';
 import 'package:watchapp/view_model/auth_viewModel.dart';
 import 'package:watchapp/view_model/cart_view_model.dart';
@@ -22,7 +22,7 @@ void main() {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: AdminPage(),
+        home: AuthCheck(),
       ),
     ),
   );

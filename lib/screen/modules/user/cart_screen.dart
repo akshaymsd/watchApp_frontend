@@ -50,20 +50,28 @@ class _CartWidgetState extends State<CartWidget> {
           return totalItems;
         }
 
-        void increment(int index) {
+        void increment(int index) async {
           final item = cartViewModel.cartItems[index];
           if (item.quantity != null) {
-            item.quantity = item.quantity! + 1;
-            cartViewModel.notifyListeners();
+            int newQuantity = item.quantity! + 1;
+            print('Incrementing item ${item.sId} to $newQuantity');
+            await cartViewModel.updateCartItemQuantity(
+                item.sId!, newQuantity, context);
           }
         }
 
-        void decrement(int index) {
+        void decrement(int index) async {
           final item = cartViewModel.cartItems[index];
           if (item.quantity != null && item.quantity! > 1) {
-            item.quantity = item.quantity! - 1;
-            cartViewModel.notifyListeners();
+            int newQuantity = item.quantity! - 1;
+            print('Decrementing item ${item.sId} to $newQuantity');
+            await cartViewModel.updateCartItemQuantity(
+                item.sId!, newQuantity, context);
           }
+        }
+
+        void deleteItem(String itemId) async {
+          await cartViewModel.deleteCartItem(itemId, context);
         }
 
         return Scaffold(
@@ -89,180 +97,174 @@ class _CartWidgetState extends State<CartWidget> {
                             fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                     )
-                  : CustomScrollView(
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: cartViewModel.cartItems.length,
+                            itemBuilder: (context, index) {
                               var item = cartViewModel.cartItems[index];
                               double price =
                                   item.productId?.price?.toDouble() ?? 0.0;
                               int qty = item.quantity ?? 0;
                               return Padding(
                                 padding: const EdgeInsets.all(20.0),
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 1,
-                                            blurRadius: 7,
-                                            offset: Offset(0, 3),
-                                          ),
-                                        ],
+                                child: Container(
+                                  height: 125,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 1,
+                                        blurRadius: 7,
+                                        offset: Offset(0, 3),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Row(
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 20, top: 10, bottom: 10),
+                                        child: Container(
+                                          height: 85,
+                                          width: 85,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[300],
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: item.productId?.image != null
+                                              ? Image.network(
+                                                  item.productId!.image!,
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Center(child: Text("No Image")),
+                                        ),
+                                      ),
+                                      SizedBox(width: 30),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Container(
-                                              height: 85,
-                                              width: 85,
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              child: item.productId?.image !=
-                                                      null
-                                                  ? Image.network(
-                                                      item.productId!.image!,
-                                                      fit: BoxFit.cover,
-                                                    )
-                                                  : Center(
-                                                      child: Text("No Image")),
+                                            SizedBox(height: 15),
+                                            Text(
+                                              item.productId?.name ?? 'No Name',
+                                              style: GoogleFonts.poppins(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 16),
                                             ),
-                                            SizedBox(width: 30),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                            SizedBox(height: 10),
+                                            Text(
+                                              "\$${price.toStringAsFixed(2)}",
+                                              style: GoogleFonts.poppins(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14),
+                                            ),
+                                            Row(
                                               children: [
-                                                SizedBox(height: 10),
-                                                Text(
-                                                  item.productId?.name ??
-                                                      'No Name',
-                                                  style: GoogleFonts.poppins(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 16),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    decrement(index);
+                                                  },
+                                                  icon: Icon(Icons.remove),
+                                                  color: Colors.blue,
                                                 ),
-                                                SizedBox(height: 10),
+                                                SizedBox(width: 10),
                                                 Text(
-                                                  "\$${price.toStringAsFixed(2)}",
+                                                  "$qty",
                                                   style: GoogleFonts.poppins(
+                                                      fontSize: 18,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 14),
+                                                          FontWeight.w600),
                                                 ),
-                                                SizedBox(height: 10),
-                                                Row(
-                                                  children: [
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        decrement(index);
-                                                      },
-                                                      icon: Icon(Icons.remove),
-                                                      color: Colors.blue,
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Text(
-                                                      "$qty",
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize: 18,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600),
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        increment(index);
-                                                      },
-                                                      icon: Icon(Icons.add),
-                                                      color: Colors.blue,
-                                                    ),
-                                                  ],
+                                                SizedBox(width: 10),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    increment(index);
+                                                  },
+                                                  icon: Icon(Icons.add),
+                                                  color: Colors.blue,
                                                 ),
                                               ],
-                                            ),
-                                            Spacer(),
-                                            IconButton(
-                                              onPressed: () {
-                                                cartViewModel.cartItems
-                                                    .removeAt(index);
-                                                cartViewModel.notifyListeners();
-                                              },
-                                              icon: Icon(
-                                                Icons.delete,
-                                                color: Colors.red,
-                                                size: 20,
-                                              ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      IconButton(
+                                        onPressed: () {
+                                          // Ensure that itemId is correctly derived from the cart item
+                                          String itemId = item.sId ??
+                                              ''; // Assuming sId is the correct identifier
+                                          deleteItem(itemId);
+                                        },
+                                        icon: Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
-                            childCount: cartViewModel.cartItems.length,
                           ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 20),
-                            padding: EdgeInsets.all(20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Total",
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  "\$${getTotalPrice().toStringAsFixed(2)}",
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 20),
-                            padding: EdgeInsets.all(20),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Handle checkout process
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.all(16),
-                                backgroundColor: Colors.blueAccent,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Checkout (${getTotalItem()} items)",
-                                  style: GoogleFonts.poppins(
-                                      color: Colors.white, fontSize: 16),
-                                ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20.0),
+                            child: Container(
+                              padding: EdgeInsets.all(20),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Total",
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    "\$${getTotalPrice().toStringAsFixed(2)}",
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20.0),
+                            child: Container(
+                              padding: EdgeInsets.all(20),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // Handle checkout process
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.all(16),
+                                  backgroundColor: Colors.blueAccent,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "Checkout (${getTotalItem()} items)",
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
         );
       },

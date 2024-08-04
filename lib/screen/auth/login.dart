@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../view_model/auth_viewModel.dart';
 import '../../widgets/ButtonWidget.dart';
 import '../../widgets/textfiled_widget.dart';
+import '../modules/admin/admin_screen.dart';
 import '../modules/user/homescreen.dart';
 import 'Register.dart';
 
@@ -64,10 +65,18 @@ class _LoginState extends State<Login> {
                           context: context,
                         );
                         if (isSuccess) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => Home()),
-                          );
+                          if (username.text == 'admin') {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AdminPage()),
+                            );
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => Home()),
+                            );
+                          }
                         }
                       }
                     },

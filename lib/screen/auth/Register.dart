@@ -142,7 +142,7 @@ class _RegisterState extends State<Register> {
                                     name: name.text,
                                     password: pass.text,
                                     email: email.text,
-                                    phone: phone.text,
+                                    phone: phone.text, // Convert to String
                                     username: username.text,
                                   ),
                                   context: context);

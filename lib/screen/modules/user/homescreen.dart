@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:watchapp/widgets/user_widget/appleProduct_widget.dart';
+import 'package:watchapp/widgets/user_widget/samsungProduct_widget.dart';
 
 import '../../../view_model/auth_viewModel.dart';
-import '../../../widgets/SmartwatchWidget.dart';
+import '../../../widgets/user_widget/SmartwatchWidget.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
 
@@ -117,10 +119,16 @@ class _HomeState extends State<Home> {
       length: 4,
       child: Column(
         children: [
-          Text(
-            "Find your suitable watch now!!",
-            style:
-                GoogleFonts.poppins(fontSize: 40, fontWeight: FontWeight.w600),
+          SizedBox(
+            height: 40,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Find your suitable watch now!!",
+              style: GoogleFonts.poppins(
+                  fontSize: 40, fontWeight: FontWeight.w600),
+            ),
           ),
           SizedBox(height: 15),
           Padding(
@@ -172,8 +180,8 @@ class _HomeState extends State<Home> {
             child: TabBarView(
               children: [
                 Center(child: Smartwatch()),
-                Center(child: Text('Apple content here')),
-                Center(child: Text('Samsung content here')),
+                Center(child: AppleProducts()),
+                Center(child: SamsungProducts()),
                 Center(child: Text('Other content here')),
               ],
             ),

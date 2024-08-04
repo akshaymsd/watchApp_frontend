@@ -47,6 +47,34 @@ class _ViewProfileState extends State<ViewProfile> {
     await authViewModel.logout(context);
   }
 
+  Future<void> _showLogoutDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Logout'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                await _logout(); // Perform the logout
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
@@ -139,17 +167,19 @@ class _ViewProfileState extends State<ViewProfile> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    side: BorderSide.none,
-                    elevation: 5,
-                    shape: StadiumBorder()),
-                onPressed: _logout,
+                  backgroundColor: Colors.red,
+                  side: BorderSide.none,
+                  elevation: 5,
+                  shape: StadiumBorder(),
+                ),
+                onPressed: _showLogoutDialog,
                 child: Text(
                   "Logout",
                   style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      color: Colors.white),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],

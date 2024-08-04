@@ -25,6 +25,11 @@ class CartModel {
     status = json['status'];
     quantity = json['quantity'];
     iV = json['__v'];
+
+    // Basic validation for `sId`
+    if (sId == null || sId!.isEmpty) {
+      print('Warning: Missing or empty cart ID');
+    }
   }
 
   Map<String, dynamic> toJson() {

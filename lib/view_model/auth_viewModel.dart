@@ -24,21 +24,26 @@ class AuthViewModel extends ChangeNotifier {
     try {
       loading = true;
       notifyListeners();
+
+      // Handle admin login
       if (username == 'admin' && password == 'admin123') {
-        // Navigate to admin page if admin credentials are used
+        await _saveLoginStatus(true);
+        await _saveUsername('admin');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminPage()),
         );
         return true;
       }
+
+      // Handle regular user login
       _currentUser =
           await _authService.login(username: username, password: password);
       if (_currentUser != null && _currentUser!.sId != null) {
         _userId = _currentUser!.sId;
-        print('Login successful, User ID: $_userId');
         await _saveLoginStatus(true);
         await _saveUserId(_userId!);
+        await _saveUsername(username);
         notifyListeners();
         Navigator.pushReplacement(
           context,
@@ -46,14 +51,8 @@ class AuthViewModel extends ChangeNotifier {
         );
         return true;
       } else {
-        // Handle case where user data is missing
         print('Login successful, but no user data received.');
-        await _saveLoginStatus(true);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Home()),
-        );
-        return true;
+        return false;
       }
     } catch (e) {
       print('Login error: $e');
@@ -95,6 +94,7 @@ class AuthViewModel extends ChangeNotifier {
     _userId = null;
     await _saveLoginStatus(false);
     await _removeUserId();
+    await _removeUsername();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => Login()),
@@ -107,14 +107,23 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> _saveUserId(String userId) async {
-    print('Saving User ID: $userId');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
+  }
+
+  Future<void> _saveUsername(String username) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
   }
 
   Future<void> _removeUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('userId');
+  }
+
+  Future<void> _removeUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('username');
   }
 
   Future<bool> checkLoginStatus() async {
@@ -131,7 +140,12 @@ class AuthViewModel extends ChangeNotifier {
   Future<String?> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
-    print('Retrieved User ID: $userId');
     return userId;
+  }
+
+  Future<String?> getUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    return username;
   }
 }

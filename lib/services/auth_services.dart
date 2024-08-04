@@ -27,8 +27,10 @@ class AuthServices {
     }
   }
 
-  Future<UserModel?> login(
-      {required String username, required String password}) async {
+  Future<UserModel?> login({
+    required String username,
+    required String password,
+  }) async {
     try {
       final Uri url = Uri.parse('$baseurl/api/auth/login');
 
@@ -47,22 +49,14 @@ class AuthServices {
         var jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['success'] == true) {
-          // Check if 'data' exists
           if (jsonResponse.containsKey('data') &&
               jsonResponse['data'] != null) {
             var userData = jsonResponse['data'];
-            if (userData is Map<String, dynamic>) {
-              var user = UserModel.fromJson(userData);
-              print('Parsed User: ${user.sId}'); // Debugging print statement
-              return user;
-            } else {
-              print('User data is not in expected format.');
-              return null;
-            }
+            var user = UserModel.fromJson(userData);
+            return user;
           } else {
-            // Handle case where user data is missing
             print('Login successful, but no user data received.');
-            return null; // Return null if no user data
+            return null;
           }
         } else {
           throw Exception('Login failed: ${jsonResponse['message']}');
@@ -71,7 +65,7 @@ class AuthServices {
         throw Exception('Failed to login. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error in AuthServices login: $e'); // Debugging print statement
+      print('Error in AuthServices login: $e');
       rethrow;
     }
   }
